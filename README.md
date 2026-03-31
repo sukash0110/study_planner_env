@@ -12,22 +12,98 @@ short_description: Streamlit study planner with energy-aware optimization.
 
 # Student Study Planner with Energy, Balance, and Performance Optimization
 
-This project implements an OpenEnv-style study planning environment for a student managing math, physics, and chemistry across multiple days.
+An OpenEnv-style reinforcement learning environment where an agent must plan study actions across math, physics, and chemistry while managing fatigue, subject imbalance, and long-horizon performance.
 
-## Features
+## Why This Environment Matters
 
-- Full environment API with `reset()`, `step(action)`, and `state()`
-- Multi-day simulation with three time slots per day
-- Actions for focused study, revision, and rest
-- Energy-aware transitions and subject mastery tracking
-- Reward shaped by:
-  - average performance improvement
-  - cross-subject balance
-  - energy efficiency
-  - penalties for imbalance and poor energy usage
-- Three tasks: `easy`, `medium`, and `hard`
-- Deterministic baseline policy that adapts to energy and mastery imbalance
-- Optional stochastic mode for varied runs
+Real students do not just maximize raw study hours. They must:
+
+- allocate time across competing subjects
+- manage limited daily energy
+- decide when to learn, reinforce, or recover
+- avoid over-optimizing one subject while neglecting others
+
+This makes study planning a strong real-world sequential decision problem. Short-term gains can hurt long-term performance if the policy ignores balance or recovery.
+
+## What The Agent Controls
+
+At every step, the agent chooses one of seven actions:
+
+- `0`: study math
+- `1`: study physics
+- `2`: study chemistry
+- `3`: revise math
+- `4`: revise physics
+- `5`: revise chemistry
+- `6`: rest
+
+Each episode spans multiple days, and each day contains three decision slots.
+
+## Environment Design
+
+The environment implements:
+
+- `reset()`
+- `step(action)` returning `(state, reward, done, info)`
+- `state()`
+
+Core simulation elements:
+
+- three subjects with independent mastery values
+- finite energy budget
+- multi-day progression
+- separate effects for studying, revising, and resting
+- deterministic and stochastic execution modes
+
+## Reward Design
+
+The reward is intentionally multi-objective rather than a simple score delta.
+
+It combines:
+
+- average performance improvement
+- balance across subjects
+- energy efficiency
+- targeted support for the weakest subject
+- penalties for subject imbalance
+- penalties for poor low-energy decisions
+- mild penalties for wasteful rest actions
+
+This encourages policies that make consistent progress without collapsing into one-subject optimization.
+
+## Tasks
+
+- `easy`: 5 days, lower mastery targets
+- `medium`: 10 days, moderate planning horizon
+- `hard`: 15 days, longer horizon with stronger balance demands
+
+## Baseline Agent
+
+The included baseline policy is deterministic by default and adapts to:
+
+- current energy level
+- weakest subject
+- mastery imbalance
+
+Behavior summary:
+
+- rests when energy is critically low
+- revises the weakest subject when imbalance becomes large
+- studies the weakest subject when mastery is still behind
+- stays reproducible for grading
+
+## Grading Strategy
+
+The grader evaluates the deterministic baseline on all three tasks and reports:
+
+- total reward
+- average mastery
+- balance gap
+- remaining energy
+- step count
+- pass/fail checks against explicit thresholds
+
+This makes the benchmark easier to interpret in a hackathon review setting.
 
 ## Project Structure
 
@@ -46,37 +122,27 @@ study_planner_env/
 └── requirements.txt
 ```
 
-## Actions
+## Run Locally
 
-The environment supports the following actions:
-
-- `0`: study math
-- `1`: study physics
-- `2`: study chemistry
-- `3`: revise math
-- `4`: revise physics
-- `5`: revise chemistry
-- `6`: rest
-
-## Running
+CLI baseline:
 
 ```bash
 python inference.py
 ```
 
-Varied run:
+Seeded stochastic run:
 
 ```bash
 python inference.py --stochastic --seed 42
 ```
 
-Fully random run:
+Different result every run:
 
 ```bash
 python inference.py --randomize
 ```
 
-Optional grading run:
+Grader:
 
 ```bash
 python grader.py
@@ -88,33 +154,18 @@ Streamlit UI:
 streamlit run app.py
 ```
 
-## Deploy to Hugging Face Spaces
+## Hugging Face Demo
 
-This repo is configured for a Docker-based Space, which is the recommended route for Streamlit apps because the built-in Streamlit SDK is deprecated in the current Hugging Face docs.
+Live Space:
 
-1. Create a new Space on Hugging Face.
-2. Choose `Docker` as the Space SDK.
-3. Upload or push the contents of this folder.
-4. Hugging Face will build the included `Dockerfile` and launch the app on port `8501`.
+[https://huggingface.co/spaces/sukash0110/study_planner_env](https://huggingface.co/spaces/sukash0110/study_planner_env)
 
-If you want to push with git:
-
-```bash
-git init
-git remote add origin https://huggingface.co/spaces/YOUR_USERNAME/YOUR_SPACE_NAME
-git add .
-git commit -m "Initial Hugging Face Space"
-git push origin main
-```
+This repo is configured as a Docker-based Hugging Face Space and serves the Streamlit dashboard on port `8501`.
 
 ## Environment Notes
 
-- Each episode spans a configured number of days.
-- Each day has three decision slots.
-- Studying gives larger gains but costs more energy.
-- Revision reinforces one subject and slightly supports others.
-- Rest restores energy but can be mildly penalized if used wastefully.
-- The baseline agent is deterministic, so results are reproducible across runs.
-- Use `--stochastic` to introduce controlled randomness while keeping runs reproducible for a given seed.
-- Use `--randomize` to get a different stochastic seed automatically on each run.
-- The Streamlit app provides a visual way to run simulations and inspect results.
+- studying gives larger gains but consumes more energy
+- revision improves one subject and lightly reinforces the others
+- rest restores energy and supports sustainable planning
+- deterministic mode is intended for reproducible evaluation
+- stochastic and randomize modes are intended for exploratory analysis
