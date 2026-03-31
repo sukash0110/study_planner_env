@@ -7,7 +7,7 @@ sdk: docker
 app_port: 8501
 pinned: false
 license: mit
-short_description: Streamlit app for a study planning environment with energy and balance optimization.
+short_description: Streamlit study planner with energy-aware optimization.
 ---
 
 # Student Study Planner with Energy, Balance, and Performance Optimization
