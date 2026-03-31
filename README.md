@@ -14,6 +14,16 @@ short_description: Streamlit study planner with energy-aware optimization.
 
 An OpenEnv-style reinforcement learning environment where an agent must plan study actions across math, physics, and chemistry while managing fatigue, subject imbalance, and long-horizon performance.
 
+## Preview
+
+### Dashboard Screenshot
+
+![Student Study Planner dashboard](assets/dashboard-preview.svg)
+
+### Walkthrough GIF
+
+![Student Study Planner walkthrough](assets/planner-walkthrough.svg)
+
 ## Why This Environment Matters
 
 Real students do not just maximize raw study hours. They must:

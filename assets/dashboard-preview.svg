@@ -1,0 +1,54 @@
+<svg width="1600" height="1000" viewBox="0 0 1600 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="1600" height="1000" rx="36" fill="#EEF4FF"/>
+<rect x="36" y="36" width="1528" height="928" rx="36" fill="#F4F8FF" stroke="#D9E4F5" stroke-width="2"/>
+<rect x="66" y="62" width="1468" height="156" rx="30" fill="white" stroke="#D8E3F4" stroke-width="2"/>
+<text x="96" y="98" fill="#0F766E" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700">STUDENT STUDY PLANNER</text>
+<text x="96" y="145" fill="#0F172A" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="800">Energy-aware study optimization dashboard</text>
+<text x="96" y="187" fill="#475569" font-family="Segoe UI, Arial, sans-serif" font-size="20">Deterministic baseline on the medium task balancing math, physics, chemistry, reward quality, and fatigue.</text>
+
+<rect x="68" y="246" width="332" height="150" rx="28" fill="white" stroke="#D8E3F4" stroke-width="2"/>
+<rect x="436" y="246" width="332" height="150" rx="28" fill="white" stroke="#D8E3F4" stroke-width="2"/>
+<rect x="804" y="246" width="332" height="150" rx="28" fill="white" stroke="#D8E3F4" stroke-width="2"/>
+<rect x="1172" y="246" width="332" height="150" rx="28" fill="white" stroke="#D8E3F4" stroke-width="2"/>
+
+<text x="92" y="276" fill="#64748B" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700">TOTAL REWARD</text>
+<text x="92" y="332" fill="#0F172A" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="800">16.1739</text>
+<text x="92" y="370" fill="#64748B" font-family="Segoe UI, Arial, sans-serif" font-size="18">Composite policy quality</text>
+
+<text x="460" y="276" fill="#64748B" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700">AVG MASTERY</text>
+<text x="460" y="332" fill="#0F172A" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="800">1.0</text>
+<text x="460" y="370" fill="#64748B" font-family="Segoe UI, Arial, sans-serif" font-size="18">End-of-episode performance</text>
+
+<text x="828" y="276" fill="#64748B" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700">BALANCE GAP</text>
+<text x="828" y="332" fill="#0F172A" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="800">0.0</text>
+<text x="828" y="370" fill="#64748B" font-family="Segoe UI, Arial, sans-serif" font-size="18">Lower means more even coverage</text>
+
+<text x="1196" y="276" fill="#64748B" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700">ENERGY LEFT</text>
+<text x="1196" y="332" fill="#0F172A" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="800">4.0</text>
+<text x="1196" y="370" fill="#64748B" font-family="Segoe UI, Arial, sans-serif" font-size="18">Recovery preserved at finish</text>
+
+<rect x="68" y="426" width="452" height="158" rx="26" fill="#0F766E"/>
+<rect x="562" y="426" width="452" height="158" rx="26" fill="#1D4ED8"/>
+<rect x="1056" y="426" width="452" height="158" rx="26" fill="#C2410C"/>
+
+<text x="92" y="458" fill="white" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700">MATH</text>
+<text x="92" y="512" fill="white" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="800">1.0000</text>
+<rect x="92" y="536" width="404" height="14" rx="7" fill="#FFFFFF33"/><rect x="92" y="536" width="404.0" height="14" rx="7" fill="white"/>
+
+<text x="586" y="458" fill="white" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700">PHYSICS</text>
+<text x="586" y="512" fill="white" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="800">1.0000</text>
+<rect x="586" y="536" width="404" height="14" rx="7" fill="#FFFFFF33"/><rect x="586" y="536" width="404.0" height="14" rx="7" fill="white"/>
+
+<text x="1080" y="458" fill="white" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700">CHEMISTRY</text>
+<text x="1080" y="512" fill="white" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="800">1.0000</text>
+<rect x="1080" y="536" width="404" height="14" rx="7" fill="#FFFFFF33"/><rect x="1080" y="536" width="404.0" height="14" rx="7" fill="white"/>
+
+<rect x="68" y="620" width="712" height="316" rx="24" fill="white" stroke="#D8E3F4" stroke-width="2"/>
+<rect x="818" y="620" width="712" height="316" rx="24" fill="white" stroke="#D8E3F4" stroke-width="2"/>
+<text x="96" y="656" fill="#0F172A" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700">Energy trajectory</text>
+<text x="846" y="656" fill="#0F172A" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700">Average mastery trajectory</text>
+<rect x="92" y="676" width="664" height="224" rx="18" fill="#F8FBFF" stroke="#E2EAF7"/>
+<rect x="842" y="676" width="664" height="224" rx="18" fill="#F8FBFF" stroke="#E2EAF7"/>
+<polyline fill="none" stroke="#0F766E" stroke-width="5" points="95.0,645.5 112.4,701.0 129.8,701.0 147.2,756.5 164.7,691.8 182.1,693.7 199.5,749.2 216.9,684.4 234.3,684.9 251.7,740.4 269.1,675.7 286.6,674.7 304.0,730.2 321.4,665.4 338.8,662.8 356.2,718.3 373.6,773.8 391.0,649.5 408.4,705.0 425.9,760.5 443.3,635.4 460.7,690.9 478.1,746.4 495.5,620.3 512.9,675.8 530.3,731.3 547.8,604.2 565.2,659.7 582.6,715.2 600.0,701.0"/>
+<polyline fill="none" stroke="#1D4ED8" stroke-width="5" points="785.0,726.9 802.4,717.5 819.8,709.7 837.2,701.9 854.7,701.9 872.1,693.9 889.5,685.9 906.9,685.9 924.3,677.6 941.7,669.4 959.1,669.4 976.6,660.8 994.0,652.3 1011.4,652.3 1028.8,643.4 1046.2,634.5 1063.6,627.3 1081.0,627.3 1098.4,621.7 1115.9,617.7 1133.3,617.7 1150.7,611.7 1168.1,607.3 1185.5,607.3 1202.9,600.8 1220.3,596.0 1237.8,596.0 1255.2,592.6 1272.6,590.0 1290.0,590.0"/>
+</svg>
