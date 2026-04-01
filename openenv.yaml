@@ -1,8 +1,16 @@
 name: study-planner-env
 entrypoint: inference.py
+api:
+  module: study_env.api
+  app: app
+  host: 0.0.0.0
+  port: 8501
 environment:
   module: study_env.env
   class: StudyPlannerEnv
+  state_model: study_env.models.StateModel
+  reset_request_model: study_env.models.ResetRequest
+  step_request_model: study_env.models.StepRequest
 tasks:
   - easy
   - medium
@@ -13,3 +21,7 @@ agent:
 grader:
   module: grader
   function: grade
+environment_variables:
+  - API_BASE_URL
+  - MODEL_NAME
+  - HF_TOKEN

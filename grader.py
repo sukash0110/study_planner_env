@@ -9,20 +9,29 @@ TASK_THRESHOLDS = {
 }
 
 
+def _clip(value):
+    return max(0.0, min(1.0, round(value, 4)))
+
+
 def evaluate_task(task_name, summary):
     episode = summary["episode_summary"]
     thresholds = TASK_THRESHOLDS[task_name]
+
+    reward_score = _clip(summary["total_reward"] / thresholds["min_reward"])
+    mastery_score = _clip(episode["average_mastery"] / thresholds["min_mastery"])
+    balance_score = _clip(thresholds["max_balance_gap"] / max(episode["balance_gap"], 0.0001))
 
     checks = {
         "reward_ok": summary["total_reward"] >= thresholds["min_reward"],
         "mastery_ok": episode["average_mastery"] >= thresholds["min_mastery"],
         "balance_ok": episode["balance_gap"] <= thresholds["max_balance_gap"],
     }
-    passed = all(checks.values())
+    score = _clip((reward_score + mastery_score + balance_score) / 3.0)
 
     return {
         "task": task_name,
-        "passed": passed,
+        "score": score,
+        "passed": all(checks.values()),
         "checks": checks,
         "thresholds": thresholds,
         "metrics": {
@@ -37,15 +46,17 @@ def evaluate_task(task_name, summary):
 
 def grade():
     task_results = {}
+    aggregate_score = 0.0
     passed_tasks = 0
 
     for task_name in TASKS:
         summary = run_episode(task_name, stochastic=False, seed=123)
         evaluation = evaluate_task(task_name, summary)
         task_results[task_name] = evaluation
+        aggregate_score += evaluation["score"]
         passed_tasks += int(evaluation["passed"])
 
-    overall_score = round(passed_tasks / len(TASKS), 4)
+    overall_score = _clip(aggregate_score / len(TASKS))
     overall_status = "pass" if passed_tasks == len(TASKS) else "partial"
 
     return {
@@ -68,13 +79,12 @@ def main():
 
     for task_name, evaluation in result["task_results"].items():
         metrics = evaluation["metrics"]
-        thresholds = evaluation["thresholds"]
-        checks = evaluation["checks"]
         print(
-            f"{task_name}: passed={evaluation['passed']}, "
-            f"reward={metrics['total_reward']} (min {thresholds['min_reward']} / {checks['reward_ok']}), "
-            f"avg_mastery={metrics['average_mastery']} (min {thresholds['min_mastery']} / {checks['mastery_ok']}), "
-            f"balance_gap={metrics['balance_gap']} (max {thresholds['max_balance_gap']} / {checks['balance_ok']}), "
+            f"{task_name}: score={evaluation['score']}, "
+            f"passed={evaluation['passed']}, "
+            f"reward={metrics['total_reward']}, "
+            f"avg_mastery={metrics['average_mastery']}, "
+            f"balance_gap={metrics['balance_gap']}, "
             f"energy_left={metrics['energy_left']}, steps={metrics['steps']}"
         )
 

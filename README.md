@@ -14,6 +14,19 @@ short_description: Streamlit study planner with energy-aware optimization.
 
 An OpenEnv-style reinforcement learning environment where an agent must plan study actions across math, physics, and chemistry while managing fatigue, subject imbalance, and long-horizon performance.
 
+## Submission Checklist Alignment
+
+This repo is structured to satisfy the common first-round validator checks:
+
+- FastAPI Space deployment with a `200` response at `/`
+- HTTP environment endpoints for `reset`, `step`, and `state`
+- root-level `inference.py`
+- three tasks and a normalized grader score in the `0.0` to `1.0` range
+- Dockerfile build path for automated repo validation
+- pre-submission validation script via `python validate_submission.py`
+- environment variable placeholders for `API_BASE_URL`, `MODEL_NAME`, and `HF_TOKEN`
+- OpenEnv packaging pieces including `pyproject.toml`, `uv.lock`, and `server/app.py`
+
 ## Preview
 
 ### Dashboard Screenshot
@@ -164,13 +177,44 @@ Streamlit UI:
 streamlit run app.py
 ```
 
+API server:
+
+```bash
+uvicorn study_env.api:app --host 0.0.0.0 --port 8501
+```
+
+Pre-submission validation:
+
+```bash
+python validate_submission.py
+```
+
 ## Hugging Face Demo
 
 Live Space:
 
 [https://huggingface.co/spaces/sukash0110/study_planner_env](https://huggingface.co/spaces/sukash0110/study_planner_env)
 
-This repo is configured as a Docker-based Hugging Face Space and serves the Streamlit dashboard on port `8501`.
+This repo is configured as a Docker-based Hugging Face Space and serves the OpenEnv-compatible API on port `8501`.
+
+For validator-style API checks, the deployment also exposes:
+
+- `GET /`
+- `GET /health`
+- `GET /tasks`
+- `POST /reset`
+- `POST /step`
+- `GET /state`
+
+## Required Environment Variables
+
+The project includes `.env.example` with the required names:
+
+- `API_BASE_URL`
+- `MODEL_NAME`
+- `HF_TOKEN`
+
+These are available as environment placeholders in the Docker image and can be overridden in your deployment configuration.
 
 ## Environment Notes
 
