@@ -110,6 +110,16 @@ def inject_styles():
             opacity: 0.9;
             margin-top: 0.35rem;
         }
+        .logo-shell {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px;
+            border-radius: 24px;
+            background: linear-gradient(160deg, rgba(255, 255, 255, 0.96), rgba(232, 241, 255, 0.92));
+            box-shadow: 0 14px 36px rgba(15, 23, 42, 0.22);
+            border: 1px solid rgba(148, 163, 184, 0.26);
+        }
         </style>
         """,
         unsafe_allow_html=True,
@@ -135,13 +145,16 @@ def build_trace_rows(trace):
     return rows
 
 
-def render_logo(width_px):
+def render_logo(width_px, framed=False):
     svg_text = Path(LOGO_PATH).read_text(encoding="utf-8")
     encoded = base64.b64encode(svg_text.encode("utf-8")).decode("utf-8")
+    wrapper_class = "logo-shell" if framed else ""
     st.markdown(
         f"""
         <div style="display:flex; justify-content:center;">
-            <img src="data:image/svg+xml;base64,{encoded}" width="{width_px}" alt="EduDynamics logo" />
+            <div class="{wrapper_class}">
+                <img src="data:image/svg+xml;base64,{encoded}" width="{width_px}" alt="EduDynamics logo" />
+            </div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -314,7 +327,7 @@ def main():
     render_hero()
 
     with st.sidebar:
-        render_logo(132)
+        render_logo(132, framed=True)
         st.markdown("### EduDynamics")
         st.caption("Energy-aware student planning simulator")
         st.markdown("---")
