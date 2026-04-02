@@ -143,13 +143,13 @@ def root():
             </div>
           </div>
           <div class="actions">
-            <a class="button primary" href="/ui" target="_blank">Open Full UI</a>
+            <a class="button primary" href="/ui/" target="_blank">Open Full UI</a>
             <a class="button" href="/docs" target="_blank">API Docs</a>
             <a class="button" href="/health" target="_blank">Health</a>
           </div>
         </div>
         <div class="frame-wrap">
-          <iframe src="/ui" title="EduDynamics Streamlit UI"></iframe>
+          <iframe src="/ui/" title="EduDynamics Streamlit UI"></iframe>
         </div>
       </body>
     </html>
@@ -209,7 +209,7 @@ def logo_asset():
 
 
 async def _proxy_http(request: Request, path: str = ""):
-    upstream_path = f"/ui/{path}" if path else "/ui"
+    upstream_path = f"/ui/{path}" if path else "/ui/"
     query_string = request.url.query
     if query_string:
         upstream_path = f"{upstream_path}?{query_string}"
@@ -230,6 +230,11 @@ async def _proxy_http(request: Request, path: str = ""):
 
 @app.api_route("/ui", methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"])
 async def proxy_streamlit_root(request: Request):
+    return await _proxy_http(request)
+
+
+@app.api_route("/ui/", methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"])
+async def proxy_streamlit_root_slash(request: Request):
     return await _proxy_http(request)
 
 
