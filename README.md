@@ -217,17 +217,18 @@ Live Space:
 This repo is configured as a Docker-based Hugging Face Space and serves a hybrid deployment on port `8501`:
 
 - `/` shows a branded landing page with the embedded Streamlit demo
-- `/ui` serves the full Streamlit application
-- API endpoints remain available for validator-style checks
+- `/ui` serves the full Streamlit application natively
+- `/api/*` serves the OpenEnv-compatible API
+- `/health` remains available through the mounted API
 
 For validator-style API checks, the deployment also exposes:
 
-- `GET /`
-- `GET /health`
-- `GET /tasks`
-- `POST /reset`
-- `POST /step`
-- `GET /state`
+- `GET /api/`
+- `GET /api/health`
+- `GET /api/tasks`
+- `POST /api/reset`
+- `POST /api/step`
+- `GET /api/state`
 
 ## Required Environment Variables
 
