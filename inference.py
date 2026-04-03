@@ -123,8 +123,10 @@ def run_episode(task_name, stochastic=False, seed=123, agent_mode="heuristic"):
                 "energy": observation["energy"],
                 "avg_mastery": observation["avg_mastery"],
                 "imbalance": observation["imbalance"],
+                "mastery": observation["mastery"],
                 "action": info["action"],
                 "reward": reward,
+                "reward_breakdown": info.get("reward_breakdown", {}),
             }
         )
 

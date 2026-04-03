@@ -4,15 +4,24 @@ from pathlib import Path
 import streamlit as st
 
 from inference import run_episode
+from study_env.env import StudyPlannerEnv
 from study_env.tasks import TASKS
 
 
 LOGO_PATH = "assets/edudynamics-logo.svg"
-
 SUBJECT_COLORS = {
     "math": "#0f766e",
     "physics": "#1d4ed8",
     "chemistry": "#c2410c",
+}
+ACTION_LABELS = {
+    0: "Study Math",
+    1: "Study Physics",
+    2: "Study Chemistry",
+    3: "Revise Math",
+    4: "Revise Physics",
+    5: "Revise Chemistry",
+    6: "Rest",
 }
 
 
@@ -145,6 +154,24 @@ def build_trace_rows(trace):
     return rows
 
 
+def build_reward_rows(trace):
+    rows = []
+    for item in trace:
+        row = {"step": item["step"]}
+        row.update(item.get("reward_breakdown", {}))
+        rows.append(row)
+    return rows
+
+
+def build_subject_rows(trace):
+    rows = []
+    for item in trace:
+        row = {"step": item["step"]}
+        row.update(item.get("mastery", {}))
+        rows.append(row)
+    return rows
+
+
 def render_logo(width_px, framed=False):
     svg_text = Path(LOGO_PATH).read_text(encoding="utf-8")
     encoded = base64.b64encode(svg_text.encode("utf-8")).decode("utf-8")
@@ -169,11 +196,10 @@ def render_hero():
         st.markdown(
             """
             <div class="hero">
-                <div class="hero-kicker">EduDynamics</div>
+                <div class="hero-kicker">EduDynamics 1.0.1</div>
                 <div class="hero-title">Build sustainable study momentum across math, physics, and chemistry.</div>
                 <div class="hero-copy">
-                    This dashboard simulates a student balancing performance, energy, and subject coverage over multiple days.
-                    Run deterministic baselines for reproducible evaluation, or switch to stochastic modes to explore varied trajectories.
+                    Explore manual interventions, compare planning styles, and inspect how reward components evolve as the student balances progress, recovery, and subject coverage.
                 </div>
             </div>
             """,
@@ -238,6 +264,7 @@ def render_plan_snapshot(summary):
                 <div class="mini-label">Scenario</div>
                 <div class="support-text">
                     Task: <strong>{summary["task"]}</strong><br>
+                    Agent: <strong>{summary.get("agent_mode", "heuristic")}</strong><br>
                     Mode: <strong>{mode_label}</strong><br>
                     Seed: <strong>{seed_label}</strong><br>
                     Steps executed: <strong>{summary["steps"]}</strong>
@@ -258,7 +285,7 @@ def render_plan_snapshot(summary):
             """
             <div class="panel">
                 <div class="support-text">
-                    The episode reward blends four signals:
+                    EduDynamics 1.0.1 exposes the reward composition more clearly:
                     <br><br>
                     <strong>Performance</strong> rewards mastery gains.
                     <br>
@@ -274,51 +301,141 @@ def render_plan_snapshot(summary):
         )
 
 
-def render_trace(summary):
+def render_analytics(summary):
     rows = build_trace_rows(summary["trace"])
-    st.markdown("### Episode Trace")
+    reward_rows = build_reward_rows(summary["trace"])
+    subject_rows = build_subject_rows(summary["trace"])
 
-    chart_cols = st.columns(2)
+    st.markdown("### Analytics")
+    chart_cols = st.columns(3)
     with chart_cols[0]:
         st.markdown("**Energy trajectory**")
         st.line_chart([{"step": row["step"], "energy": row["energy"]} for row in rows], x="step", y="energy")
     with chart_cols[1]:
-        st.markdown("**Mastery trajectory**")
-        st.line_chart(
-            [{"step": row["step"], "avg_mastery": row["avg_mastery"]} for row in rows],
-            x="step",
-            y="avg_mastery",
-        )
+        st.markdown("**Average mastery**")
+        st.line_chart([{"step": row["step"], "avg_mastery": row["avg_mastery"]} for row in rows], x="step", y="avg_mastery")
+    with chart_cols[2]:
+        st.markdown("**Reward by step**")
+        st.bar_chart([{"step": row["step"], "reward": row["reward"]} for row in rows], x="step", y="reward")
 
-    view = st.segmented_control(
-        "Trace view",
-        options=["Recent", "Full"],
-        default="Recent",
-        selection_mode="single",
-    )
+    lower_cols = st.columns(2)
+    with lower_cols[0]:
+        st.markdown("**Reward component breakdown**")
+        if reward_rows:
+            st.area_chart(reward_rows, x="step")
+    with lower_cols[1]:
+        st.markdown("**Subject mastery over time**")
+        if subject_rows:
+            st.line_chart(subject_rows, x="step")
+
+    view = st.segmented_control("Trace view", options=["Recent", "Full"], default="Recent", selection_mode="single")
     if view == "Recent":
         st.dataframe(rows[-8:], use_container_width=True, hide_index=True)
     else:
         st.dataframe(rows, use_container_width=True, hide_index=True, height=360)
 
-    focus_step = st.slider("Inspect step", min_value=1, max_value=len(rows), value=len(rows))
-    detail = rows[focus_step - 1]
-    st.markdown(
-        f"""
-        <div class="panel">
-            <div class="mini-label">Step {detail["step"]}</div>
-            <div class="support-text">
-                Day <strong>{detail["day"]}</strong> |
-                Action <strong>{detail["action_type"]}:{detail["subject"]}</strong> |
-                Reward <strong>{detail["reward"]}</strong><br>
-                Energy <strong>{detail["energy"]}</strong> |
-                Avg mastery <strong>{detail["avg_mastery"]}</strong> |
-                Imbalance <strong>{detail["imbalance"]}</strong>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+
+def ensure_manual_state(task_name, stochastic, seed):
+    config = {"task_name": task_name, "stochastic": stochastic, "seed": seed}
+    if st.session_state.get("manual_config") != config:
+        env = StudyPlannerEnv(task_name=task_name, stochastic=stochastic, seed=seed)
+        observation = env.reset()
+        st.session_state.manual_env = env
+        st.session_state.manual_obs = observation
+        st.session_state.manual_done = False
+        st.session_state.manual_history = []
+        st.session_state.manual_config = config
+
+
+def render_manual_lab(task_name, stochastic, seed):
+    ensure_manual_state(task_name, stochastic, seed)
+    env = st.session_state.manual_env
+    observation = st.session_state.manual_obs
+    done = st.session_state.manual_done
+
+    st.markdown("### Manual Simulation Lab")
+    control_cols = st.columns([1.2, 1, 1])
+    with control_cols[0]:
+        chosen_action = st.selectbox("Choose next action", options=list(ACTION_LABELS.keys()), format_func=lambda x: ACTION_LABELS[x])
+    with control_cols[1]:
+        step_clicked = st.button("Apply Action", use_container_width=True, disabled=done)
+    with control_cols[2]:
+        reset_clicked = st.button("Reset Manual Lab", use_container_width=True)
+
+    if reset_clicked:
+        st.session_state.manual_config = None
+        ensure_manual_state(task_name, stochastic, seed)
+        env = st.session_state.manual_env
+        observation = st.session_state.manual_obs
+        done = st.session_state.manual_done
+
+    if step_clicked and not done:
+        next_obs, reward, done, info = env.step(chosen_action)
+        st.session_state.manual_obs = next_obs
+        st.session_state.manual_done = done
+        st.session_state.manual_history.append(
+            {
+                "step": len(st.session_state.manual_history) + 1,
+                "action": ACTION_LABELS[chosen_action],
+                "reward": reward,
+                "day": next_obs["day"],
+                "energy": next_obs["energy"],
+                "avg_mastery": next_obs["avg_mastery"],
+                "imbalance": next_obs["imbalance"],
+                "reward_breakdown": info.get("reward_breakdown", {}),
+            }
+        )
+        observation = next_obs
+
+    top_cols = st.columns(4)
+    top_cols[0].metric("Day", observation["day"])
+    top_cols[1].metric("Energy", observation["energy"])
+    top_cols[2].metric("Average Mastery", observation["avg_mastery"])
+    top_cols[3].metric("Imbalance", observation["imbalance"])
+
+    mastery_cols = st.columns(3)
+    for col, subject in zip(mastery_cols, ("math", "physics", "chemistry")):
+        col.metric(subject.title(), observation["mastery"][subject])
+
+    if st.session_state.manual_history:
+        last = st.session_state.manual_history[-1]
+        st.markdown("**Latest reward breakdown**")
+        component_rows = [{"component": key, "value": value} for key, value in last["reward_breakdown"].items()]
+        st.bar_chart(component_rows, x="component", y="value")
+        st.dataframe(st.session_state.manual_history, use_container_width=True, hide_index=True, height=240)
+    else:
+        st.info("Step through the environment manually to inspect reward components and state transitions.")
+
+
+def render_compare(task_name):
+    st.markdown("### Agent Comparison")
+    compare_col1, compare_col2 = st.columns(2)
+    heuristic_summary = run_episode(task_name, stochastic=False, seed=123, agent_mode="heuristic")
+
+    with compare_col1:
+        st.markdown("**Heuristic baseline**")
+        st.metric("Total Reward", heuristic_summary["total_reward"])
+        st.metric("Average Mastery", heuristic_summary["episode_summary"]["average_mastery"])
+        st.metric("Balance Gap", heuristic_summary["episode_summary"]["balance_gap"])
+
+    with compare_col2:
+        st.markdown("**OpenAI-ready baseline**")
+        if st.secrets.get("OPENAI_API_KEY", None) or st.session_state.get("has_openai_key") or st.session_state.get("openai_key_hint"):
+            st.info("OpenAI baseline can be executed when OPENAI_API_KEY is configured in the environment.")
+        else:
+            st.info("Set OPENAI_API_KEY to run the OpenAI baseline. The app keeps the deterministic baseline available for offline usage.")
+
+    comparison_rows = [
+        {
+            "agent": "heuristic",
+            "total_reward": heuristic_summary["total_reward"],
+            "average_mastery": heuristic_summary["episode_summary"]["average_mastery"],
+            "balance_gap": heuristic_summary["episode_summary"]["balance_gap"],
+            "energy_left": heuristic_summary["episode_summary"]["energy_left"],
+            "steps": heuristic_summary["steps"],
+        }
+    ]
+    st.dataframe(comparison_rows, use_container_width=True, hide_index=True)
 
 
 def main():
@@ -351,15 +468,18 @@ def main():
 
     if "summary" not in st.session_state:
         st.session_state.summary = None
+    if "manual_config" not in st.session_state:
+        st.session_state.manual_config = None
+
+    stochastic = mode in {"stochastic", "randomize"}
+    actual_seed = None if mode == "randomize" else int(seed)
 
     if run_clicked:
-        stochastic = mode in {"stochastic", "randomize"}
-        actual_seed = None if mode == "randomize" else int(seed)
-        st.session_state.summary = run_episode(task_name, stochastic=stochastic, seed=actual_seed)
+        st.session_state.summary = run_episode(task_name, stochastic=stochastic, seed=actual_seed, agent_mode="heuristic")
 
     summary = st.session_state.summary
     if summary is None:
-        st.info("Pick a task profile and run the planner to see the simulation dashboard.")
+        st.info("Pick a task profile and run the planner to open the 1.0.1 analytics workspace.")
         return
 
     render_metric_panels(summary)
@@ -367,8 +487,14 @@ def main():
     render_subject_cards(summary)
     st.markdown("")
     render_plan_snapshot(summary)
-    st.markdown("")
-    render_trace(summary)
+
+    overview_tab, manual_tab, compare_tab = st.tabs(["Overview", "Manual Lab", "Compare"])
+    with overview_tab:
+        render_analytics(summary)
+    with manual_tab:
+        render_manual_lab(task_name, stochastic, actual_seed)
+    with compare_tab:
+        render_compare(task_name)
 
 
 if __name__ == "__main__":
