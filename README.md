@@ -1,5 +1,5 @@
 ---
-title: EduDynamics
+title: EduDynamics 1.0.1
 emoji: 📚
 colorFrom: blue
 colorTo: green
@@ -7,16 +7,18 @@ sdk: docker
 app_port: 8501
 pinned: false
 license: mit
-short_description: Streamlit study planner with energy-aware optimization.
+short_description: EduDynamics 1.0.1 with manual simulation, richer analytics, and OpenEnv-ready evaluation.
 ---
 
-# EduDynamics
+# EduDynamics 1.0.1
 
-Student Study Planner with energy, balance, and performance optimization.
+Student Study Planner with energy, balance, performance optimization, and a hybrid analytics workspace.
 
 ![EduDynamics logo](assets/edudynamics-logo.svg)
 
 An OpenEnv-style reinforcement learning environment where an agent must plan study actions across math, physics, and chemistry while managing fatigue, subject imbalance, and long-horizon performance.
+
+Version `1.0.1` adds a richer Streamlit analytics workspace with manual stepping, reward-component inspection, and side-by-side baseline comparison while preserving the validator-ready OpenEnv API.
 
 ## Submission Checklist Alignment
 
@@ -127,6 +129,14 @@ Behavior summary:
 
 The OpenAI baseline runs with temperature `0` so the action policy remains reproducible for a fixed model and prompt.
 
+## What's New In 1.0.1
+
+- manual step-by-step simulation lab inside the Streamlit UI
+- reward component visualizations across the episode
+- subject mastery trend charts
+- richer trace inspection with state and reward context
+- heuristic baseline comparison workspace
+
 ## Grading Strategy
 
 The grader evaluates the deterministic baseline on all three tasks and reports:
@@ -214,7 +224,7 @@ Live Space:
 
 [https://huggingface.co/spaces/sukash0110/study_planner_env](https://huggingface.co/spaces/sukash0110/study_planner_env)
 
-This repo is configured as a Docker-based Hugging Face Space and serves a hybrid deployment on port `8501`:
+This repo is configured as a Docker-based Hugging Face Space and serves the `1.0.1` hybrid deployment on port `8501`:
 
 - `/` shows a branded landing page with the embedded Streamlit demo
 - `/ui` serves the full Streamlit application natively

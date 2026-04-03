@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "edudynamics"
-version = "0.1.0"
-description = "EduDynamics: an OpenEnv-compatible student study planning environment with API, grader, and baseline inference."
+version = "1.0.1"
+description = "EduDynamics 1.0.1: an OpenEnv-compatible student study planning environment with hybrid UI, grader, and baseline inference."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
