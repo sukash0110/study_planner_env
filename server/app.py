@@ -18,6 +18,8 @@ def _start_streamlit():
             "--server.headless=true",
             "--browser.gatherUsageStats=false",
             "--server.baseUrlPath=ui",
+            "--server.enableCORS=false",
+            "--server.enableXsrfProtection=false",
         ]
     )
 

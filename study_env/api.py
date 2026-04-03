@@ -245,13 +245,24 @@ async def proxy_streamlit(request: Request, path: str):
 
 @app.websocket("/ui/{path:path}")
 async def websocket_proxy(websocket: WebSocket, path: str):
-    await websocket.accept()
+    subprotocols = websocket.scope.get("subprotocols", [])
+    accept_subprotocol = subprotocols[0] if subprotocols else None
+    await websocket.accept(subprotocol=accept_subprotocol)
     query = websocket.url.query
     upstream_url = f"{STREAMLIT_WS_UPSTREAM}/ui/{path}"
     if query:
         upstream_url = f"{upstream_url}?{query}"
+    forwarded_headers = [
+        (key, value)
+        for key, value in websocket.headers.items()
+        if key.lower() in {"cookie", "origin", "user-agent"}
+    ]
 
-    async with websockets.connect(upstream_url) as upstream:
+    async with websockets.connect(
+        upstream_url,
+        additional_headers=forwarded_headers,
+        subprotocols=subprotocols or None,
+    ) as upstream:
         async def client_to_upstream():
             while True:
                 message = await websocket.receive()
