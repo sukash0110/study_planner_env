@@ -18,7 +18,7 @@ Student Study Planner with energy, balance, performance optimization, a liquid-g
 
 An OpenEnv-style reinforcement learning environment where an agent must plan study actions across math, physics, and chemistry while managing fatigue, subject imbalance, and long-horizon performance.
 
-Version `1.0.3` adds the liquid-glass UI refresh plus a more realistic learning model with retention risk, memory strength, spacing, and recovery-aware planning while preserving the validator-ready OpenEnv API.
+Version `1.0.3` adds the liquid-glass UI refresh, now presented as `AuraUI 1.0.3`, plus a more realistic learning model with retention risk, memory strength, spacing, and recovery-aware planning while preserving the validator-ready OpenEnv API.
 
 ## Submission Checklist Alignment
 

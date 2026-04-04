@@ -19,7 +19,7 @@ def landing_page(_request):
           <head>
             <meta charset="utf-8" />
             <meta name="viewport" content="width=device-width, initial-scale=1" />
-            <title>EduDynamics</title>
+            <title>AuraUI 1.0.3</title>
             <style>
               body {
                 margin: 0;
@@ -92,9 +92,9 @@ def landing_page(_request):
           <body>
             <div class="topbar">
               <div class="brand">
-                <img src="/logo" alt="EduDynamics logo" />
+                <img src="/logo" alt="AuraUI logo" />
                 <div>
-                  <div class="brand-title">EduDynamics 1.0.3</div>
+                  <div class="brand-title">AuraUI 1.0.3</div>
                   <div class="brand-copy">Liquid-glass simulation with retention-aware learning dynamics and evaluator-ready APIs.</div>
                 </div>
               </div>
@@ -105,7 +105,7 @@ def landing_page(_request):
               </div>
             </div>
             <div class="frame-wrap">
-              <iframe src="/ui" title="EduDynamics Streamlit UI"></iframe>
+              <iframe src="/ui" title="AuraUI 1.0.3"></iframe>
             </div>
           </body>
         </html>
