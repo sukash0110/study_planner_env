@@ -268,7 +268,7 @@ def render_logo(width_px, framed=False):
         f"""
         <div style="display:flex; justify-content:center;">
             <div class="{wrapper_class}">
-                <img src="data:image/svg+xml;base64,{encoded}" width="{width_px}" alt="AuraUI logo" />
+                <img src="data:image/svg+xml;base64,{encoded}" width="{width_px}" alt="EduDynamics logo" />
             </div>
         </div>
         """,
@@ -384,7 +384,7 @@ def render_plan_snapshot(summary):
             """
             <div class="panel">
                 <div class="support-text">
-                    AuraUI 1.0.3 visualizes learning that lasts:
+                    EduDynamics visualizes learning that lasts through the AuraUI 1.0.3 layer:
                     <br><br>
                     <strong>Performance</strong> rewards mastery gains.
                     <br>
@@ -565,13 +565,13 @@ def render_compare(task_name):
 
 
 def main():
-    st.set_page_config(page_title="AuraUI 1.0.3", page_icon="📚", layout="wide")
+    st.set_page_config(page_title="EduDynamics", page_icon="📚", layout="wide")
     inject_styles()
     render_hero()
 
     with st.sidebar:
         render_logo(132, framed=True)
-        st.markdown("### AuraUI 1.0.3")
+        st.markdown("### EduDynamics")
         st.caption("Liquid-glass study planning simulator")
         st.markdown("---")
         st.markdown("## Simulation Controls")
