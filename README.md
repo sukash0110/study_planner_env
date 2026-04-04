@@ -1,5 +1,5 @@
 ---
-title: EduDynamics 1.0.3
+title: EduDynamics 1.1.0
 emoji: 📚
 colorFrom: blue
 colorTo: green
@@ -7,10 +7,10 @@ sdk: docker
 app_port: 8501
 pinned: false
 license: mit
-short_description: EduDynamics 1.0.3 with glass UI and learning dynamics.
+short_description: EduDynamics 1.1.0 with bug fixes and learning dynamics.
 ---
 
-# EduDynamics 1.0.3
+# EduDynamics 1.1.0
 
 Student Study Planner with energy, balance, performance optimization, a liquid-glass analytics workspace, and more realistic learning dynamics.
 
@@ -18,7 +18,7 @@ Student Study Planner with energy, balance, performance optimization, a liquid-g
 
 An OpenEnv-style reinforcement learning environment where an agent must plan study actions across math, physics, and chemistry while managing fatigue, subject imbalance, and long-horizon performance.
 
-Version `1.0.3` adds the liquid-glass UI refresh through the `AuraUI 1.0.3` interface layer, while the app itself remains `EduDynamics`, plus a more realistic learning model with retention risk, memory strength, spacing, and recovery-aware planning while preserving the validator-ready OpenEnv API.
+Version `1.1.0` focuses on major bug fixes and quality improvements while keeping the `AuraUI 1.1.0` interface layer, the hybrid deployment, and the more realistic learning model with retention risk, memory strength, spacing, and recovery-aware planning.
 
 ## Submission Checklist Alignment
 
@@ -129,14 +129,14 @@ Behavior summary:
 
 The OpenAI baseline runs with temperature `0` so the action policy remains reproducible for a fixed model and prompt.
 
-## What's New In 1.0.3
+## What's New In 1.1.0
 
-- Apple-inspired liquid-glass dashboard styling across the Streamlit app
-- manual step-by-step simulation lab inside the Streamlit UI
-- reward component visualizations across the episode
-- subject mastery, memory-strength, and retention-risk trend charts
-- real learning integration with spacing, forgetting, consolidation, and cognitive load
-- heuristic baseline comparison workspace
+- appearance mode is now explicit and persistent inside the UI instead of relying on flaky browser/theme detection
+- expensive reruns are cached so switching tabs and compare views feels much smoother
+- shared version and branding labels are centralized to reduce UI drift and copy mismatches
+- light-mode chrome, controls, and info panels were cleaned up for better readability
+- hybrid UI/API branding was tightened so `EduDynamics` remains the app name while `AuraUI 1.1.0` stays the interface layer
+- the real-learning model with spacing, forgetting, consolidation, and cognitive load remains intact
 
 ## Grading Strategy
 
@@ -225,7 +225,7 @@ Live Space:
 
 [https://huggingface.co/spaces/sukash0110/study_planner_env](https://huggingface.co/spaces/sukash0110/study_planner_env)
 
-This repo is configured as a Docker-based Hugging Face Space and serves the `1.0.3` hybrid deployment on port `8501`:
+This repo is configured as a Docker-based Hugging Face Space and serves the `1.1.0` hybrid deployment on port `8501`:
 
 - `/` shows a branded landing page with the embedded Streamlit demo
 - `/ui` serves the full Streamlit application natively

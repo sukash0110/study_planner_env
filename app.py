@@ -8,6 +8,10 @@ from study_env.env import StudyPlannerEnv
 from study_env.tasks import TASKS
 
 
+APP_NAME = "EduDynamics"
+APP_VERSION = "1.1.0"
+UI_LAYER_NAME = "AuraUI"
+UI_LAYER_VERSION = "1.1.0"
 LOGO_PATH = "assets/edudynamics-logo.svg"
 SUBJECT_COLORS = {
     "math": "#64d2ff",
@@ -493,6 +497,20 @@ def build_retention_rows(trace):
     return rows
 
 
+@st.cache_data(show_spinner=False)
+def run_episode_cached(task_name, stochastic, seed, agent_mode):
+    return run_episode(task_name, stochastic=stochastic, seed=seed, agent_mode=agent_mode)
+
+
+def safe_has_openai_key():
+    try:
+        if st.secrets.get("OPENAI_API_KEY"):
+            return True
+    except Exception:
+        pass
+    return bool(st.session_state.get("has_openai_key") or st.session_state.get("openai_key_hint"))
+
+
 def render_logo(width_px, framed=False):
     svg_text = Path(LOGO_PATH).read_text(encoding="utf-8")
     encoded = base64.b64encode(svg_text.encode("utf-8")).decode("utf-8")
@@ -501,7 +519,7 @@ def render_logo(width_px, framed=False):
         f"""
         <div style="display:flex; justify-content:center;">
             <div class="{wrapper_class}">
-                <img src="data:image/svg+xml;base64,{encoded}" width="{width_px}" alt="EduDynamics logo" />
+                <img src="data:image/svg+xml;base64,{encoded}" width="{width_px}" alt="{APP_NAME} logo" />
             </div>
         </div>
         """,
@@ -515,9 +533,9 @@ def render_hero():
         render_logo(260)
     with copy_col:
         st.markdown(
-            """
+            f"""
             <div class="hero">
-                <div class="hero-kicker">AuraUI 1.0.3</div>
+                <div class="hero-kicker">{UI_LAYER_NAME} {UI_LAYER_VERSION}</div>
                 <div class="hero-title">A liquid-glass command center for real study momentum.</div>
                 <div class="hero-copy">
                     Explore manual interventions, richer reward telemetry, retention risk, and memory strength as the planner balances focus, recovery, spacing, and subject coverage.
@@ -614,10 +632,10 @@ def render_plan_snapshot(summary):
     with right:
         st.markdown("### Reward Design")
         st.markdown(
-            """
+            f"""
             <div class="panel">
                 <div class="support-text">
-                    EduDynamics visualizes learning that lasts through the AuraUI 1.0.3 layer:
+                    {APP_NAME} visualizes learning that lasts through the {UI_LAYER_NAME} {UI_LAYER_VERSION} layer:
                     <br><br>
                     <strong>Performance</strong> rewards mastery gains.
                     <br>
@@ -767,7 +785,7 @@ def render_manual_lab(task_name, stochastic, seed):
 def render_compare(task_name):
     st.markdown("### Agent Comparison")
     compare_col1, compare_col2 = st.columns(2)
-    heuristic_summary = run_episode(task_name, stochastic=False, seed=123, agent_mode="heuristic")
+    heuristic_summary = run_episode_cached(task_name, stochastic=False, seed=123, agent_mode="heuristic")
 
     with compare_col1:
         st.markdown("**Heuristic baseline**")
@@ -778,7 +796,7 @@ def render_compare(task_name):
 
     with compare_col2:
         st.markdown("**OpenAI-ready baseline**")
-        if st.secrets.get("OPENAI_API_KEY", None) or st.session_state.get("has_openai_key") or st.session_state.get("openai_key_hint"):
+        if safe_has_openai_key():
             st.info("OpenAI baseline can be executed when OPENAI_API_KEY is configured in the environment.")
         else:
             st.info("Set OPENAI_API_KEY to run the OpenAI baseline. The app keeps the deterministic baseline available for offline usage.")
@@ -798,13 +816,22 @@ def render_compare(task_name):
 
 
 def main():
-    st.set_page_config(page_title="EduDynamics", page_icon="📚", layout="wide")
+    st.set_page_config(page_title=APP_NAME, page_icon="📚", layout="wide")
+
+    if "appearance" not in st.session_state:
+        st.session_state.appearance = "Dark"
 
     with st.sidebar:
-        appearance = st.segmented_control("Appearance", options=["Dark", "Light"], default="Dark", selection_mode="single")
+        appearance = st.segmented_control(
+            "Appearance",
+            options=["Dark", "Light"],
+            default=st.session_state.appearance,
+            selection_mode="single",
+        )
+        st.session_state.appearance = appearance
         inject_styles(appearance.lower())
         render_logo(132, framed=True)
-        st.markdown("### EduDynamics")
+        st.markdown(f"### {APP_NAME}")
         st.caption("Liquid-glass study planning simulator")
         st.markdown("---")
         st.markdown("## Simulation Controls")
@@ -840,11 +867,11 @@ def main():
     actual_seed = None if mode == "randomize" else int(seed)
 
     if run_clicked:
-        st.session_state.summary = run_episode(task_name, stochastic=stochastic, seed=actual_seed, agent_mode="heuristic")
+        st.session_state.summary = run_episode_cached(task_name, stochastic=stochastic, seed=actual_seed, agent_mode="heuristic")
 
     summary = st.session_state.summary
     if summary is None:
-        st.info("Pick a task profile and run the planner to open the liquid-glass 1.0.3 analytics workspace.")
+        st.info(f"Pick a task profile and run the planner to open the liquid-glass {APP_VERSION} analytics workspace.")
         return
 
     render_metric_panels(summary)
