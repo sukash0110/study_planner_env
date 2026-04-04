@@ -20,6 +20,10 @@ An OpenEnv-style reinforcement learning environment where an agent must plan stu
 
 Version `1.1.0` focuses on major bug fixes and quality improvements while keeping the `AuraUI 1.1.0` interface layer, the hybrid deployment, and the more realistic learning model with retention risk, memory strength, spacing, and recovery-aware planning.
 
+Release history:
+
+- see [CHANGELOG.md](CHANGELOG.md) for the version-by-version update log from `1.0.0` onward
+
 ## Submission Checklist Alignment
 
 This repo is structured to satisfy the common first-round validator checks:
