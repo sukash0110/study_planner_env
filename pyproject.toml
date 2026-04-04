@@ -28,4 +28,4 @@ dependencies = [
 server = "server.app:main"
 
 [tool.setuptools.packages.find]
-include = ["study_env*", "server*"]
+include = ["study_env*", "server*", "ui*", "runtime*", "evaluation*", "tooling*"]

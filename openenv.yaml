@@ -16,10 +16,10 @@ tasks:
   - medium
   - hard
 agent:
-  module: inference
+  module: runtime.inference_runner
   class: DeterministicPlannerAgent
 grader:
-  module: grader
+  module: evaluation.grader_runner
   function: grade
 environment_variables:
   - API_BASE_URL

@@ -38,6 +38,18 @@ This repo is structured to satisfy the common first-round validator checks:
 - OpenAI baseline support through `OPENAI_API_KEY`
 - OpenEnv packaging pieces including `pyproject.toml`, `uv.lock`, and `server/app.py`
 
+## Project Layout
+
+The repository is organized so the hackathon-required root entry points still exist, while the main implementation lives in named folders:
+
+- `ui/`: Streamlit dashboard implementation
+- `runtime/`: inference agents and episode runner
+- `evaluation/`: grader logic and scoring
+- `tooling/`: local validation utilities
+- `study_env/`: OpenEnv environment, typed models, API, and tasks
+- `server/`: hybrid Hugging Face deployment entrypoint
+- root wrappers: compatibility files for `app.py`, `inference.py`, `grader.py`, and `validate_submission.py`
+
 ## Preview
 
 ### Dashboard Screenshot
@@ -159,17 +171,31 @@ This makes the benchmark easier to interpret in a hackathon review setting.
 
 ```text
 study_planner_env/
-├── study_env/
+├── assets/
+├── evaluation/
 │   ├── __init__.py
-│   ├── env.py
-│   ├── tasks.py
+│   └── grader_runner.py
+├── runtime/
+│   ├── __init__.py
+│   └── inference_runner.py
+├── scripts/
+├── server/
+├── study_env/
+├── tooling/
+│   ├── __init__.py
+│   └── validate_submission_runner.py
+├── ui/
+│   ├── __init__.py
+│   └── dashboard.py
 ├── app.py
 ├── inference.py
 ├── grader.py
 ├── openenv.yaml
 ├── README.md
+├── CHANGELOG.md
 ├── Dockerfile
-└── requirements.txt
+├── requirements.txt
+└── validate_submission.py
 ```
 
 ## Run Locally
