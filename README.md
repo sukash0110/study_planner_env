@@ -1,5 +1,5 @@
 ---
-title: EduDynamics 1.1.0
+title: EduDynamics 1.1.1
 emoji: 📚
 colorFrom: blue
 colorTo: green
@@ -7,10 +7,10 @@ sdk: docker
 app_port: 8501
 pinned: false
 license: mit
-short_description: EduDynamics 1.1.0 with bug fixes and learning dynamics.
+short_description: EduDynamics 1.1.1 with tougher tasks and stronger grading.
 ---
 
-# EduDynamics 1.1.0
+# EduDynamics 1.1.1
 
 EduDynamics is a real-world OpenEnv reinforcement learning environment for student study planning across math, physics, and chemistry under energy, balance, and long-horizon retention constraints.
 
@@ -28,7 +28,7 @@ Live links:
 - GitHub: [sukash0110/study_planner_env](https://github.com/sukash0110/study_planner_env)
 - Hugging Face Space: [EduDynamics](https://huggingface.co/spaces/sukash0110/study_planner_env)
 
-Version `1.1.0` focuses on major bug fixes, cleaner organization, and a more stable `AuraUI 1.1.0` interface layer on top of the realistic learning model with retention risk, memory strength, spacing, and recovery-aware planning.
+Version `1.1.1` improves judge-facing benchmark quality with `AuraUI 1.1.1`, a harder deadline-aware long-horizon task, and a stronger grader that scores deadline readiness alongside reward, mastery, and balance.
 
 Release history:
 
@@ -81,6 +81,13 @@ Real students do not just maximize raw study hours. They must:
 
 This makes study planning a strong real-world sequential decision problem. Short-term gains can hurt long-term performance if the policy ignores balance or recovery.
 
+What this environment evaluates well:
+
+- long-horizon planning under energy and recovery constraints
+- retention-aware scheduling instead of short-term reward chasing
+- balancing uneven subject progress against deadline pressure
+- deciding when revision is better than more studying
+
 ## What The Agent Controls
 
 At every step, the agent chooses one of seven actions:
@@ -131,7 +138,7 @@ This encourages policies that make consistent progress without collapsing into o
 
 - `easy`: 5 days, lower mastery targets
 - `medium`: 10 days, moderate planning horizon
-- `hard`: 15 days, longer horizon with stronger balance demands
+- `hard`: 15 days, longer horizon with stronger balance demands, weighted subject priorities, and deadline pressure
 
 ## Baseline Agent
 
@@ -155,14 +162,13 @@ Behavior summary:
 
 The OpenAI baseline runs with temperature `0` so the action policy remains reproducible for a fixed model and prompt.
 
-## What's New In 1.1.0
+## What's New In 1.1.1
 
-- appearance mode is now explicit and persistent inside the UI instead of relying on flaky browser/theme detection
-- expensive reruns are cached so switching tabs and compare views feels much smoother
-- shared version and branding labels are centralized to reduce UI drift and copy mismatches
-- light-mode chrome, controls, and info panels were cleaned up for better readability
-- hybrid UI/API branding was tightened so `EduDynamics` remains the app name while `AuraUI 1.1.0` stays the interface layer
-- the real-learning model with spacing, forgetting, consolidation, and cognitive load remains intact
+- upgraded the hard task with subject weighting and deadline pressure so greedy studying is less effective
+- added deadline readiness as an explicit grader dimension alongside reward, mastery, and balance
+- strengthened the README framing around what frontier model abilities this benchmark measures
+- bumped the interface layer to `AuraUI 1.1.1`
+- kept the organization, hybrid deployment, and real-learning model improvements from `1.1.0`
 
 ## Grading Strategy
 

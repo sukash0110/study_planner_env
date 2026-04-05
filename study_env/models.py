@@ -11,6 +11,9 @@ class TaskConfigModel(BaseModel):
     decay_rate: float
     consolidation_rate: float
     spacing_target: int
+    subject_weights: Dict[str, float]
+    deadline_day: int
+    deadline_pressure: float
     initial_mastery: Dict[str, float]
 
 
@@ -49,6 +52,9 @@ class StateModel(BaseModel):
     daily_target: float
     cognitive_load: float
     recovery_score: float
+    deadline_day: int
+    deadline_urgency: float
+    subject_weights: Dict[str, float]
     stochastic: bool
     seed: Optional[int]
     action_meanings: Dict[int, str]

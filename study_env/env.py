@@ -33,6 +33,9 @@ class StudyPlannerEnv:
         self.decay_rate = float(self.config.get("decay_rate", 0.012))
         self.consolidation_rate = float(self.config.get("consolidation_rate", 0.028))
         self.spacing_target = int(self.config.get("spacing_target", 2))
+        self.subject_weights = deepcopy(self.config.get("subject_weights", {subject: 1.0 for subject in self.SUBJECTS}))
+        self.deadline_day = int(self.config.get("deadline_day", self.max_days))
+        self.deadline_pressure = float(self.config.get("deadline_pressure", 0.0))
         self.energy = float(self.max_energy)
         self.mastery = deepcopy(self.config["initial_mastery"])
         if self.stochastic:
@@ -75,6 +78,9 @@ class StudyPlannerEnv:
             "daily_target": self.daily_target,
             "cognitive_load": round(self.cognitive_load, 4),
             "recovery_score": round(self.recovery_score, 4),
+            "deadline_day": self.deadline_day,
+            "deadline_urgency": round(self._deadline_urgency(), 4),
+            "subject_weights": {name: round(value, 4) for name, value in self.subject_weights.items()},
             "stochastic": self.stochastic,
             "seed": self.seed,
             "action_meanings": self.action_meanings(),
@@ -151,12 +157,21 @@ class StudyPlannerEnv:
 
     def _apply_study(self, subject):
         spacing_bonus, repetition_penalty = self._learning_modifiers(subject)
+        weight = self.subject_weights.get(subject, 1.0)
         base_gain = 0.18
         difficulty_penalty = 0.06 if self.mastery[subject] > 0.75 else 0.0
         energy_factor = 0.48 + (self.energy / self.max_energy) * 0.52
         load_factor = max(0.45, 1.0 - self.cognitive_load * 0.4)
         retention_factor = 1.0 + max(0.0, 0.55 - self.memory_strength[subject]) * 0.2
-        gain = max(0.035, base_gain * energy_factor * load_factor * retention_factor + spacing_bonus - difficulty_penalty - repetition_penalty)
+        deadline_boost = self._deadline_subject_bonus(subject)
+        gain = max(
+            0.035,
+            base_gain * energy_factor * load_factor * retention_factor * weight
+            + spacing_bonus
+            + deadline_boost
+            - difficulty_penalty
+            - repetition_penalty,
+        )
         if self.stochastic:
             gain += self.rng.uniform(-0.03, 0.03)
             gain = max(0.02, gain)
@@ -171,7 +186,8 @@ class StudyPlannerEnv:
 
     def _apply_revision(self, subject):
         spacing_bonus, repetition_penalty = self._learning_modifiers(subject)
-        reinforcement = 0.08 + max(0.0, 0.03 - abs(0.6 - self.mastery[subject]) * 0.03) + spacing_bonus * 0.75
+        deadline_boost = self._deadline_subject_bonus(subject) * 0.7
+        reinforcement = 0.08 + max(0.0, 0.03 - abs(0.6 - self.mastery[subject]) * 0.03) + spacing_bonus * 0.75 + deadline_boost
         if self.stochastic:
             reinforcement += self.rng.uniform(-0.02, 0.02)
             reinforcement = max(0.03, reinforcement)
@@ -215,8 +231,26 @@ class StudyPlannerEnv:
         for subject in self.SUBJECTS:
             spacing_gap = self.days_since_review.get(subject, self.day - self.last_touched_day.get(subject, 0))
             gap_pressure = min(1.0, spacing_gap / (self.spacing_target + 2))
-            risks[subject] = min(1.0, max(0.0, gap_pressure * 0.6 + (1.0 - self.memory_strength[subject]) * 0.4))
+            weight = self.subject_weights.get(subject, 1.0)
+            deadline_adjustment = self._deadline_urgency() * max(0.0, weight - 0.9) * 0.22
+            risks[subject] = min(
+                1.0,
+                max(0.0, gap_pressure * 0.6 + (1.0 - self.memory_strength[subject]) * 0.4 + deadline_adjustment),
+            )
         return risks
+
+    def _deadline_urgency(self):
+        if self.deadline_pressure <= 0:
+            return 0.0
+        days_left = max(0, self.deadline_day - self.day + 1)
+        if days_left <= 0:
+            return min(1.0, self.deadline_pressure + 0.35)
+        horizon = max(1, self.deadline_day)
+        return min(1.0, self.deadline_pressure * (1.0 + (horizon - days_left) / horizon))
+
+    def _deadline_subject_bonus(self, subject):
+        weight = self.subject_weights.get(subject, 1.0)
+        return self._deadline_urgency() * max(0.0, weight - 0.95) * 0.08
 
     def _end_day(self):
         total_mastery = sum(self.mastery.values())
@@ -237,6 +271,9 @@ class StudyPlannerEnv:
         self.energy = min(self.max_energy, self.energy + 4.0)
         self.cognitive_load = max(0.04, self.cognitive_load * 0.62)
         self.recovery_score = min(1.0, self.recovery_score + 0.12)
+        if self.deadline_pressure > 0 and self.day >= self.deadline_day:
+            self.cognitive_load = min(1.0, self.cognitive_load + self.deadline_pressure * 0.2)
+            self.recovery_score = max(0.0, self.recovery_score - self.deadline_pressure * 0.08)
         self.touched_today = set()
         self.slot = 0
         self.day += 1
@@ -249,6 +286,8 @@ class StudyPlannerEnv:
         current_memory = sum(self.memory_strength.values()) / len(self.memory_strength)
         previous_memory = sum(prev_memory.values()) / len(prev_memory)
         retention_gain = (current_memory - previous_memory) * 6.0
+        deadline_readiness = self._deadline_readiness_score()
+        deadline_bonus = deadline_readiness * self._deadline_urgency() * 1.6
 
         balance_gap = max(self.mastery.values()) - min(self.mastery.values())
         previous_gap = max(prev_mastery.values()) - min(prev_mastery.values())
@@ -278,6 +317,7 @@ class StudyPlannerEnv:
         reward = (
             avg_gain
             + retention_gain
+            + deadline_bonus
             + balance_shift
             + efficiency_score
             + spacing_reward
@@ -293,6 +333,7 @@ class StudyPlannerEnv:
         breakdown = {
             "average_performance": round(avg_gain, 4),
             "retention_progress": round(retention_gain, 4),
+            "deadline_readiness": round(deadline_bonus, 4),
             "balance_adjustment": round(balance_shift, 4),
             "energy_efficiency": round(efficiency_score, 4),
             "spacing_reward": round(spacing_reward, 4),
@@ -317,5 +358,21 @@ class StudyPlannerEnv:
             "energy_left": round(self.energy, 4),
             "cognitive_load": round(self.cognitive_load, 4),
             "recovery_score": round(self.recovery_score, 4),
+            "deadline_readiness": round(self._deadline_readiness_score(), 4),
             "days_completed": self.max_days,
         }
+
+    def _deadline_readiness_score(self):
+        weighted_mastery = 0.0
+        weighted_memory = 0.0
+        weight_total = 0.0
+        for subject in self.SUBJECTS:
+            weight = self.subject_weights.get(subject, 1.0)
+            weighted_mastery += self.mastery[subject] * weight
+            weighted_memory += self.memory_strength[subject] * weight
+            weight_total += weight
+        if weight_total == 0:
+            return 0.0
+        mastery_component = weighted_mastery / weight_total
+        memory_component = weighted_memory / weight_total
+        return min(1.0, max(0.0, mastery_component * 0.7 + memory_component * 0.3))

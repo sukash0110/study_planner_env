@@ -3,9 +3,9 @@ from study_env.tasks import TASKS
 
 
 TASK_THRESHOLDS = {
-    "easy": {"min_reward": 6.5, "min_mastery": 0.72, "max_balance_gap": 0.18},
-    "medium": {"min_reward": 13.0, "min_mastery": 0.95, "max_balance_gap": 0.08},
-    "hard": {"min_reward": 11.5, "min_mastery": 0.95, "max_balance_gap": 0.08},
+    "easy": {"min_reward": 6.5, "min_mastery": 0.72, "max_balance_gap": 0.18, "min_deadline_readiness": 0.72},
+    "medium": {"min_reward": 13.0, "min_mastery": 0.95, "max_balance_gap": 0.08, "min_deadline_readiness": 0.9},
+    "hard": {"min_reward": 11.5, "min_mastery": 0.95, "max_balance_gap": 0.08, "min_deadline_readiness": 0.92},
 }
 
 
@@ -20,13 +20,15 @@ def evaluate_task(task_name, summary):
     reward_score = _clip(summary["total_reward"] / thresholds["min_reward"])
     mastery_score = _clip(episode["average_mastery"] / thresholds["min_mastery"])
     balance_score = _clip(thresholds["max_balance_gap"] / max(episode["balance_gap"], 0.0001))
+    readiness_score = _clip(episode.get("deadline_readiness", 0.0) / thresholds["min_deadline_readiness"])
 
     checks = {
         "reward_ok": summary["total_reward"] >= thresholds["min_reward"],
         "mastery_ok": episode["average_mastery"] >= thresholds["min_mastery"],
         "balance_ok": episode["balance_gap"] <= thresholds["max_balance_gap"],
+        "deadline_ready_ok": episode.get("deadline_readiness", 0.0) >= thresholds["min_deadline_readiness"],
     }
-    score = _clip((reward_score + mastery_score + balance_score) / 3.0)
+    score = _clip((reward_score + mastery_score + balance_score + readiness_score) / 4.0)
 
     return {
         "task": task_name,
@@ -38,6 +40,7 @@ def evaluate_task(task_name, summary):
             "total_reward": summary["total_reward"],
             "average_mastery": episode["average_mastery"],
             "balance_gap": episode["balance_gap"],
+            "deadline_readiness": episode.get("deadline_readiness", 0.0),
             "energy_left": episode["energy_left"],
             "steps": summary["steps"],
         },
