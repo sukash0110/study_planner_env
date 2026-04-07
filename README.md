@@ -25,8 +25,8 @@ This submission includes:
 
 Live links:
 
-- GitHub: [sukash0110/study_planner_env](https://github.com/sukash0110/study_planner_env)
-- Hugging Face Space: [EduDynamics](https://huggingface.co/spaces/sukash0110/study_planner_env)
+- GitHub: [sukash0110/edudynamics](https://github.com/sukash0110/edudynamics)
+- Hugging Face Space: [EduDynamics](https://huggingface.co/spaces/sukash0110/edudynamics)
 
 Version `1.1.1` improves judge-facing benchmark quality with `AuraUI 1.1.1`, a harder deadline-aware long-horizon task, and a stronger grader that scores deadline readiness alongside reward, mastery, and balance.
 
@@ -183,7 +183,7 @@ This makes the benchmark easier to interpret in a hackathon review setting.
 ## Project Structure
 
 ```text
-study_planner_env/
+edudynamics/
 |-- docs/
 |   `-- CHANGELOG.md
 |-- evaluation/
@@ -280,7 +280,7 @@ python validate_submission.py
 
 Live Space:
 
-[https://huggingface.co/spaces/sukash0110/study_planner_env](https://huggingface.co/spaces/sukash0110/study_planner_env)
+[https://huggingface.co/spaces/sukash0110/edudynamics](https://huggingface.co/spaces/sukash0110/edudynamics)
 
 This repo is configured as a Docker-based Hugging Face Space and serves the `1.1.1` hybrid deployment on port `8501`:
 
