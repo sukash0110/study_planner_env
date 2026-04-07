@@ -80,29 +80,24 @@ class OpenAIBaselineAgent:
         )
 
     def act(self, observation):
-        response = self.client.responses.create(
+        response = self.client.chat.completions.create(
             model=self.model_name,
             temperature=0,
-            input=[
+            messages=[
                 {
                     "role": "system",
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": (
-                                "You are a deterministic planning agent. "
-                                "Always return valid JSON with an integer action from 0 to 6."
-                            ),
-                        }
-                    ],
+                    "content": (
+                        "You are a deterministic planning agent. "
+                        "Always return valid JSON with an integer action from 0 to 6."
+                    ),
                 },
                 {
                     "role": "user",
-                    "content": [{"type": "text", "text": self._build_prompt(observation)}],
+                    "content": self._build_prompt(observation),
                 },
             ],
         )
-        text = response.output_text.strip()
+        text = (response.choices[0].message.content or "").strip()
         payload = json.loads(text)
         action = int(payload["action"])
         if action < 0 or action > 6:
@@ -187,9 +182,11 @@ def run_logged_episode(task_name, stochastic=False, seed=123, agent_mode="heuris
     if agent_mode == "openai":
         agent = OpenAIBaselineAgent()
         model_name = agent.model_name
+        fallback_agent = DeterministicPlannerAgent(stochastic_tie_break=stochastic, seed=seed)
     else:
         agent = DeterministicPlannerAgent(stochastic_tie_break=stochastic, seed=seed)
         model_name = "heuristic"
+        fallback_agent = None
 
     observation = env.reset()
     rewards = []
@@ -202,7 +199,12 @@ def run_logged_episode(task_name, stochastic=False, seed=123, agent_mode="heuris
     try:
         done = False
         while not done:
-            action = agent.act(observation)
+            try:
+                action = agent.act(observation)
+            except Exception:
+                if fallback_agent is None:
+                    raise
+                action = fallback_agent.act(observation)
             observation, reward, done, info = env.step(action)
             rewards.append(reward)
             steps_taken += 1
