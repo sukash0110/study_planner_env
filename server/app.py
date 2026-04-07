@@ -138,15 +138,29 @@ def state(_request):
 
 
 async def reset(request: Request):
-    payload = await request.json() if request.method == "POST" else {}
-    reset_request = ResetRequest(**payload)
+    payload = {}
+    if request.method == "POST":
+        try:
+            payload = await request.json()
+        except Exception:
+            payload = {}
+    try:
+        reset_request = ResetRequest(**payload)
+    except Exception as exc:
+        return JSONResponse({"error": f"invalid reset payload: {exc}"}, status_code=400)
     observation = StateModel(**session.reset(reset_request)).model_dump()
     return JSONResponse({"observation": observation, "done": False, "info": {"message": "environment reset"}})
 
 
 async def step(request: Request):
-    payload = await request.json()
-    step_request = StepRequest(**payload)
+    try:
+        payload = await request.json()
+    except Exception:
+        return JSONResponse({"error": "invalid step payload: expected JSON"}, status_code=400)
+    try:
+        step_request = StepRequest(**payload)
+    except Exception as exc:
+        return JSONResponse({"error": f"invalid step payload: {exc}"}, status_code=400)
     observation, reward, done, info = session.step(step_request.action)
     return JSONResponse(
         {
