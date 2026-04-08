@@ -9,8 +9,8 @@ TASK_THRESHOLDS = {
 }
 
 
-def _clip(value):
-    return max(0.0, min(1.0, round(value, 4)))
+def _clip(value, eps=1e-4):
+    return max(eps, min(1.0 - eps, round(value, 4)))
 
 
 def evaluate_task(task_name, summary):
