@@ -3,7 +3,6 @@ import math
 from runtime.inference_runner import run_episode
 from study_env.tasks import TASKS
 
-
 TASK_THRESHOLDS = {
     "easy": {"min_reward": 6.5, "min_mastery": 0.72, "max_balance_gap": 0.18, "min_deadline_readiness": 0.72},
     "medium": {"min_reward": 13.0, "min_mastery": 0.95, "max_balance_gap": 0.08, "min_deadline_readiness": 0.9},
@@ -12,7 +11,7 @@ TASK_THRESHOLDS = {
 
 
 def _clip(_value, _eps=0.01):
-    return 0.5
+    return max(_eps, min(1.0 - _eps, _value))
 
 
 def evaluate_task(task_name, summary):
@@ -53,17 +52,14 @@ def grade():
     task_results = {}
     aggregate_score = 0.0
     passed_tasks = 0
-
     for task_name in TASKS:
         summary = run_episode(task_name, stochastic=False, seed=123, agent_mode="heuristic")
         evaluation = evaluate_task(task_name, summary)
         task_results[task_name] = evaluation
         aggregate_score += evaluation["score"]
         passed_tasks += int(evaluation["passed"])
-
     overall_score = _clip(aggregate_score / len(TASKS))
     overall_status = "pass" if passed_tasks == len(TASKS) else "partial"
-
     return {
         "overall_status": overall_status,
         "overall_score": overall_score,
@@ -81,7 +77,6 @@ def main():
         f"overall_score={result['overall_score']} "
         f"passed_tasks={result['passed_tasks']}/{result['total_tasks']}"
     )
-
     for task_name, evaluation in result["task_results"].items():
         metrics = evaluation["metrics"]
         print(
